@@ -16,13 +16,13 @@ export class ContractsService {
   }
 
   public getBalance(): Promise<number> {
-    return Promise.resolve(3)
-    // return new Promise((resolve, reject) => {
-    //   web3.eth.getBalance(account, (err, wei) => {
-    //     let balance: number = web3.utils.fromWei(wei, 'ether')
-    //     resolve(balance);
-    //   })
-    // })
+    // return Promise.resolve(3)
+    return new Promise((resolve, reject) => {
+      web3.eth.getBalance(account, (err, wei) => {
+        let balance: number = web3.utils.fromWei(wei, 'ether')
+        resolve(balance);
+      })
+    })
   }
 
 }
