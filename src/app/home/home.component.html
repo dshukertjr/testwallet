@@ -1,2 +1,10 @@
-<div>Balance: {{balance}}</div>
-<div>symbol: {{tokenSymbol}}</div>
+<div>Token Balance: {{customTokenBalance}}</div>
+<div>Ether balance: {{etherBalance}}</div>
+
+<button (click)="createAccount()" mat-raised-button>create account</button>
+
+<div *ngIf="account">
+    <div>Public Address: {{account.address}}</div>
+
+    <div>Private Key: {{account.privateKey}}</div>
+</div>

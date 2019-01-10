@@ -12,33 +12,47 @@ export class HomeComponent implements OnInit {
   publicAddress:string = "0xEEf4880E9Eb3ad610253926c9883c86b7623Bc1d"
 
 
-  public balance: number;
+  public customTokenBalance: number;
 
   public tokenSymbol: string;
+
+  public etherBalance: number;
+
+  public account: any;
 
   constructor(private readonly cs: ContractsService) {
   }
 
   ngOnInit() {
-    this.getBalance()
-    // this.getTokenSymbol()
+    this.getCustomTokenBalance()
+    this.getEtherBalance()
   }
 
-  private async getBalance() {
-    try{
-      this.balance = await this.cs.getBalance(this.publicAddress)
+  private async createAccount() {
+    try {
+      this.account = await this.cs.createAccount()
+      console.log(this.account)
     }catch(e) {
       return console.error(e)
       //handle error here
     }
   }
 
-  private async getTokenSymbol() {
+  private async getEtherBalance() {
     try{
-      this.tokenSymbol = await this.cs.getSymbol()
+      this.etherBalance = await this.cs.getEtherBalance(this.publicAddress)
     }catch(e) {
       return console.error(e)
-      // handle error here
+      //handle error here
+    }
+  }
+
+  private async getCustomTokenBalance() {
+    try{
+      this.customTokenBalance = await this.cs.getCustomTokenBalance(this.publicAddress)
+    }catch(e) {
+      return console.error(e)
+      //handle error here
     }
   }
 }

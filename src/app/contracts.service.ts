@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import * as Web3 from 'web3';
+// import { Web3 } from "web3";
+import { EthereumTx } from "ethereumjs-tx";
 
-declare let require: any;
-declare let window: any;
+
+// declare let require: any;
+// declare let window: any;
 
 
 @Injectable()
@@ -17,9 +20,37 @@ export class ContractsService {
   constructor() {
   }
 
-  public getBalance(publicAddress: string): Promise<number> {
+  public sendCustomTokenTo(fromAddress: string, toAddress: string): Promise<any> {
+    try{
+      return new Promise((resolve, reject) => {
+        resolve("success")
+      })
+    }catch(e) {
+      return Promise.reject(e)
+    }
+  }
+
+  public async createAccount() {
+    var account = await this.web3.eth.accounts.create()
+    return account
+  }
+
+  public getEtherBalance(publicAddress: string): Promise<number> {
+    try{
+      return new Promise((resolve, reject) => {
+        this.web3.eth.getBalance(publicAddress, (e, wei) => {
+          if(e) reject(e)
+          let balance: number = this.web3.utils.fromWei(wei, 'ether')
+          resolve(balance);
+        })
+      })
+        }catch(e) {
+    }
+  }
+
+  public getCustomTokenBalance(publicAddress: string): Promise<number> {
     try {
-      console.log(this.tokenContract)
+      // console.log(this.tokenContract)
       var balancePromise = new Promise((resolve, reject) => {
         this.tokenContract.methods.balanceOf(publicAddress).call((e, result) => {
           if(e) reject(e)
@@ -33,28 +64,15 @@ export class ContractsService {
         })
       })
       return Promise.all([balancePromise, decimalsPromise]).then(res => {
-        console.log(res)
+        // console.log(res)
         var balanceWei: number = +res[0]
         var decimals: number = +res[1]
-        console.log(balanceWei, decimals)
+        // console.log(balanceWei, decimals)
         var balanceToken = balanceWei / (Math.pow(10, decimals))
-        console.log(balanceToken)
+        // console.log(balanceToken)
         return Promise.resolve(balanceToken)
       })
     } catch (e) {
-      return Promise.reject(e)
-    }
-  }
-
-  public getSymbol(): Promise<string> {
-    try{
-      return new Promise((resolve, reject) => {
-        this.tokenContract.methods.symbol().call((e, result) => {
-          if(e) reject(e)
-          resolve(result)
-        })
-      })
-    }catch(e) {
       return Promise.reject(e)
     }
   }
