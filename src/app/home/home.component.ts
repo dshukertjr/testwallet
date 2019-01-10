@@ -9,17 +9,36 @@ import { ContractsService } from "../contracts.service";
 })
 export class HomeComponent implements OnInit {
 
+  publicAddress:string = "0xEEf4880E9Eb3ad610253926c9883c86b7623Bc1d"
+
+
   public balance: number;
+
+  public tokenSymbol: string;
 
   constructor(private readonly cs: ContractsService) {
   }
 
-  private async getBalance() {
-    this.balance = await this.cs.getBalance()
-  }
-
   ngOnInit() {
     this.getBalance()
+    // this.getTokenSymbol()
   }
 
+  private async getBalance() {
+    try{
+      this.balance = await this.cs.getBalance(this.publicAddress)
+    }catch(e) {
+      return console.error(e)
+      //handle error here
+    }
+  }
+
+  private async getTokenSymbol() {
+    try{
+      this.tokenSymbol = await this.cs.getSymbol()
+    }catch(e) {
+      return console.error(e)
+      // handle error here
+    }
+  }
 }
