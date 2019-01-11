@@ -47,7 +47,9 @@ export class HomeComponent implements OnInit {
 
   async sendCustomTokenTo() {
     try {
-      await this.cs.sendCustomToken(this.account, this.recevingEthAccount, this.sendAmount.toString())
+      const amount = (this.sendAmount * Math.pow(10, this.customTokenDecimal)).toString()
+      console.log(amount)
+      await this.cs.sendCustomToken(this.account, this.recevingEthAccount, amount)
       this.getAccounts()
       console.log("done sending custom token")
     } catch (e) {
@@ -58,7 +60,9 @@ export class HomeComponent implements OnInit {
 
   async sendEtherTo() {
     try {
-      await this.cs.sendEther(this.account, this.recevingEthAccount, this.sendAmount.toString())
+      const amount = this.sendAmount.toString()
+      console.log(amount)
+      await this.cs.sendEther(this.account, this.recevingEthAccount, amount)
       this.getAccounts()
       console.log("done sending custom token")
     } catch (e) {
