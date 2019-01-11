@@ -8,3 +8,26 @@
 
     <div>Private Key: {{account.privateKey}}</div>
 </div>
+
+<div>
+    <mat-form-field appearance="outline">
+        <mat-label>Sending Account Private Key</mat-label>
+        <input required matInput [(ngModel)]="account.privateKey">
+        <mat-error>Required</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Receiving account address</mat-label>
+        <input required matInput [(ngModel)]="recevingEthAccount.address">
+        <mat-error>Required</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Send Amount</mat-label>
+        <input required matInput [(ngModel)]="sendAmount">
+        <mat-error>Required</mat-error>
+    </mat-form-field>
+
+    <button mat-raised-button (click)="sendEtherTo()">Send Ether</button>
+    <button mat-raised-button (click)="sendCustomTokenTo()">Send Custom Token</button>
+</div>
