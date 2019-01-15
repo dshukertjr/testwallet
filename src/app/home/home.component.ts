@@ -37,6 +37,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.getAccounts()
+    this.onNewBlock()
   }
 
   getAccounts() {
@@ -45,13 +46,32 @@ export class HomeComponent implements OnInit {
     this.getEtherBalance()
   }
 
+  onNewBlock() {
+    try {
+      const that = this
+      console.log("on new block")
+      this.cs.newBlockSubscription.subscribe((e, res) => {
+        console.log("sucscribed")
+        console.log(res)
+        if (e) return console.error(e)
+      }).on('data', async (txHash) => {
+        console.log(`new block txHash: ${txHash}`)
+        that.etherBalance = await that.cs.getEtherBalance(that.account.address)
+        that.rawCustomTokenBalance = await that.cs.getRawCustomTokenBalance(that.account.address)
+        that.calculateCustomTokenBalance()
+      })
+    } catch (e) {
+      return console.error(e)
+    }
+  }
+
   async sendCustomTokenTo() {
     try {
       const amount = (this.sendAmount * Math.pow(10, this.customTokenDecimal)).toString()
       console.log(amount)
       await this.cs.sendCustomToken(this.account, this.recevingEthAccount, amount)
       this.getAccounts()
-      console.log("done sending custom token")
+      console.log("custom token send request sent")
     } catch (e) {
       alert(e)
       return console.error(e)
@@ -64,7 +84,7 @@ export class HomeComponent implements OnInit {
       console.log(amount)
       await this.cs.sendEther(this.account, this.recevingEthAccount, amount)
       this.getAccounts()
-      console.log("done sending custom token")
+      console.log("ether send request sent")
     } catch (e) {
       alert(e)
       return console.error(e)
@@ -85,7 +105,7 @@ export class HomeComponent implements OnInit {
     try {
       this.etherBalance = await this.cs.getEtherBalance(this.account.address)
     } catch (e) {
-      alert(e)
+      // alert(e)
       return console.error(e)
     }
   }
@@ -95,7 +115,7 @@ export class HomeComponent implements OnInit {
       this.rawCustomTokenBalance = await this.cs.getRawCustomTokenBalance(this.account.address)
       this.calculateCustomTokenBalance()
     } catch (e) {
-      alert(e)
+      // alert(e)
       return console.error(e)
     }
   }
