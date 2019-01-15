@@ -13,7 +13,7 @@ export class HomeComponent implements OnInit {
 
   public rawCustomTokenBalance: number
 
-  public customTokenBalance: number
+  public customTokenBalance: string
 
   public tokenSymbol: string
 
@@ -54,8 +54,7 @@ export class HomeComponent implements OnInit {
         console.log("sucscribed")
         console.log(res)
         if (e) return console.error(e)
-      }).on('data', async (txHash) => {
-        console.log(`new block txHash: ${txHash}`)
+      }).on('data', async (res) => {
         that.etherBalance = await that.cs.getEtherBalance(that.account.address)
         that.rawCustomTokenBalance = await that.cs.getRawCustomTokenBalance(that.account.address)
         that.calculateCustomTokenBalance()
@@ -134,7 +133,7 @@ export class HomeComponent implements OnInit {
     if (this.rawCustomTokenBalance && this.customTokenDecimal) {
       var rawCustomTokenBalance: number = +this.rawCustomTokenBalance
       var decimals: number = +this.customTokenDecimal
-      this.customTokenBalance = rawCustomTokenBalance / (Math.pow(10, decimals))
+      this.customTokenBalance = (rawCustomTokenBalance / (Math.pow(10, decimals))).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     }
   }
 }
