@@ -4,6 +4,7 @@ import * as Web3 from 'web3';
 // import { EtherTx } from "ethereumjs-tx";
 import * as Tx from 'ethereumjs-tx'
 import { EthAccount } from "./models/eth-account";
+import { toDate } from '@angular/common/src/i18n/format_date';
 
 
 
@@ -18,30 +19,111 @@ export class ContractsService {
   contractAddress: string = "0xB1Ef691806FBccc3B84F46186827ef883c33BccE"
   tokenContract = new this.web3.eth.Contract(this.contractABI, this.contractAddress)
   newBlockSubscription = this.web3socket.eth.subscribe('newBlockHeaders')
+  pendingTransactionsSubscription = this.web3socket.eth.subscribe('pendingTransactions')
 
 
   constructor() {
   }
 
-  // //executes method on new block creation of Ether
-  // public async onNewBlock(methods: Array<Function>) {
-  //   try {
-  //     console.log("on new block")
-  //     const subscription = this.web3socket.eth.subscribe('newBlockHeaders')
-  //     subscription.subscribe((e, res) => {
-  //       console.log("sucscribed")
-  //       console.log(res)
-  //       if (e) return console.error(e)
-  //     }).on('data', (txHash) => {
-  //       console.log(`new block txHash: ${txHash}`)
-  //       methods.forEach(method => {
-  //         method()
-  //       })
+  // watchEtherTransfers() {
+  //   this.pendingTransactionsSubscription.subscribe((e, result) => {
+  //     if (e) console.error(e)
+  //   })
+  //     .on('data', async (txHash) => {
+  //       try {
+  //         const trx = await this.web3.eth.getTransaction(txHash)
+
+  //         // const valid = this.validateTransaction(trx)
+  //         // // If transaction is not valid, simply return
+  //         // if (!valid) {
+  //         //   console.log("invalid transaction")
+  //         //   return
+  //         // }
+
+  //         console.log('Found incoming Ether transaction from ' + process.env.WALLET_FROM + ' to ' + process.env.WALLET_TO);
+  //         console.log('Transaction value is: ' + process.env.AMOUNT)
+  //         console.log('Transaction hash is: ' + txHash + '\n')
+
+  //         // Initiate transaction confirmation
+  //         this.confirmEtherTransaction(txHash)
+
+  //         // Unsubscribe from pending transactions.
+  //         this.subscription.unsubscribe()
+  //       }
+  //       catch (error) {
+  //         console.log(error)
+  //       }
   //     })
-  //   } catch (e) {
-  //     throw(e)
-  //     // return console.error(e)
+  // }
+
+  // async getConfirmations(txHash) {
+  //   try {
+  //     const trx = await this.web3socket.eth.getTransaction(txHash)
+
+  //     // Get current block number
+  //     const currentBlock = await this.web3socket.eth.getBlockNumber()
+
+  //     // When transaction is unconfirmed, its block number is null.
+  //     // In this case we return 0 as number of confirmations
+  //     return trx.blockNumber === null ? 0 : currentBlock - trx.blockNumber
+  //   } catch (error) {
+  //     console.log(error)
   //   }
+  // }
+
+  // confirmEtherTransaction(txHash, confirmations = 10) {
+  //   setTimeout(async () => {
+
+  //     // Get current number of confirmations and compare it with sought-for value
+  //     const trxConfirmations = await this.getConfirmations(txHash)
+
+  //     console.log('Transaction with hash ' + txHash + ' has ' + trxConfirmations + ' confirmation(s)')
+
+  //     if (trxConfirmations >= confirmations) {
+  //       // Handle confirmation event according to your business logic
+
+  //       console.log('Transaction with hash ' + txHash + ' has been successfully confirmed')
+
+  //       return
+  //     }
+  //     // Recursive call
+  //     return this.confirmEtherTransaction(txHash, confirmations)
+  //   }, 30 * 1000)
+  // }
+
+  // watchTokenTransfers(fromAccount: EthAccount, toAccount: EthAccount, sentAmount: string) {
+  //   // Instantiate token contract object with JSON ABI and address
+  //   const tokenContract = new this.web3socket.eth.Contract(
+  //     this.contractABI, this.contractAddress,
+  //     (error, result) => { if (error) console.log(error) }
+  //   )
+
+  //   // Generate filter options
+  //   const options = {
+  //     filter: {
+  //       _from: fromAccount.address,
+  //       _to: toAccount.address,
+  //       _value: sentAmount
+  //     },
+  //     fromBlock: 'latest'
+  //   }
+
+  //   // Subscribe to Transfer events matching filter criteria
+  //   tokenContract.events.Transfer(options, async (error, event) => {
+  //     if (error) {
+  //       console.log(error)
+  //       return
+  //     }
+
+  //     console.log('Found incoming Pluton transaction from ' + process.env.WALLET_FROM + ' to ' + process.env.WALLET_TO + '\n');
+  //     console.log('Transaction value is: ' + process.env.AMOUNT)
+  //     console.log('Transaction hash is: ' + txHash + '\n')
+
+  //     // Initiate transaction confirmation
+  //     this.confirmEtherTransaction(event.transactionHash)
+
+  //     return
+  //   })
   // }
 
   public async sendCustomToken(fromAccount: EthAccount, toAccount: EthAccount, transfferAmount: string): Promise<any> {
@@ -51,8 +133,8 @@ export class ContractsService {
           if (e) reject(e)
           const txObject = {
             "nonce": this.web3.utils.toHex(txCount),
-            "gasPrice": this.web3.utils.toHex(this.web3.utils.toWei('10', 'gwei')),
-            "gasLimit": this.web3.utils.toHex(50000),
+            "gasPrice": this.web3.utils.toHex(this.web3.utils.toWei('4', 'gwei')),
+            "gasLimit": this.web3.utils.toHex(200000),
             "to": this.contractAddress,
             "data": this.tokenContract.methods.transfer(toAccount.address, transfferAmount).encodeABI(),
           }

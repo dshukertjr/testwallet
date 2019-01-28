@@ -12,4 +12,6 @@ html, body {
 body {
     padding: 0;
     margin: 0;
+    --primary-color: #ff0000;
+    --accent-color: #00ff00;
 }

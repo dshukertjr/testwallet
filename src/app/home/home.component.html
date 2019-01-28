@@ -1,6 +1,9 @@
 <div>Token Balance: {{customTokenBalance}}</div>
 <div>Ether balance: {{etherBalance}}</div>
 
+
+<button (click)="createNewBitcoinAccount()" mat-raised-button>create bitcoin wallet</button>
+
 <button (click)="createAccount()" mat-raised-button>create account</button>
 
 <div *ngIf="account">
