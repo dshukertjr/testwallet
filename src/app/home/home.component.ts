@@ -7,6 +7,11 @@ import * as Btc from 'bitcoinjs-lib'
 // import * as request from "request";
 // import { request } from "request";
 import { HttpClient } from '@angular/common/http';
+// import * as sha256 from 'js-sha256';
+const sha256 = require('js-sha256')
+const ripemd160 = require('ripemd160')
+import * as sipemd160 from 'ripemd160';
+
 
 
 @Component({
@@ -37,6 +42,7 @@ export class HomeComponent implements OnInit {
   }
 
   public bitCoinAmount: number
+
   private TestNet = Btc.networks.testnet
 
   public account: EthAccount = {
@@ -62,15 +68,32 @@ export class HomeComponent implements OnInit {
     this.getEtherBalance()
   }
 
+  async createPublicAddress() {
+    // var hash = sha256(Buffer.from(msg, 'hex'))
+  }
+
   async getBitcoinAmount() {
     var addr = this.bitCoinAccount["address"]
     console.log("address", addr)
     // console.log(JSON)
     var res = await this.http.get(`https://testnet.blockexplorer.com/api/addr/${addr}/balance`).toPromise()
     console.log("res", res)
+    return res.toString()
     // this..get(`https://testnet.blockexplorer.com/api/${addr}/balance`, (err, req, body) => {
     // //   console.log(JSON.parse(body))
     // })
+  }
+
+  async sendBitcoin() {
+    var currentAmount = parseInt(await this.getBitcoinAmount())
+    var sendAmount = 2000 //in satoshi
+    var fee = 1000 //in satoshi
+    var amountToKeep = currentAmount - sendAmount - fee
+    console.log("currentAmount", currentAmount, "sendAmount", sendAmount, "fee", fee, "amountToKeep", amountToKeep)
+    var tx = new Btc.TransactionBuilder(this.TestNet)
+    console.log("tx", tx)
+
+    // this.http.post(`https://testnet.blockexplorer.com/api/tx/send`, )
   }
 
   createNewBitcoinAccount() {
@@ -79,14 +102,26 @@ export class HomeComponent implements OnInit {
     console.log("keypair", keyPair)
     // let publicKey = keyPair.getAddress()
     // let privateKey = keyPair.toWIF()
-    var address = Btc.payments.p2pkh({ pubkey: keyPair.publicKey, network: this.TestNet }).address
+    var pkh = Btc.payments.p2pkh({ pubkey: keyPair.publicKey, network: this.TestNet }) //public key hash
+    console.log("pkh", pkh)
+    var hash = sha256(Buffer.from(pkh.address, "hex"))
+    console.log("hash", hash)
+    var publicKeyHash = new ripemd160().update(Buffer.from(hash, "hex")).digest()
+    console.log("public key hash", publicKeyHash)
+    var step1 = Buffer.from(`00${publicKeyHash}`, "hex")
+    console.log("step1", step1)
+    var step2 = sha256(step1)
+    console.log("step2", step2)
+    // const step1 = Buffer.from(`00${pkh.hash}`, 'hex')
+    // console.log("step1", step1)
+    var address = pkh.address
     console.log("address", address)
     var privateKey = keyPair.toWIF()
     console.log("privateKey", privateKey)
     this.bitCoinAccount["address"] = address
     this.bitCoinAccount["privateKey"] = privateKey
     console.log("bitcoin account", this.bitCoinAccount)
-}
+  }
 
 onNewBlock() {
   try {
