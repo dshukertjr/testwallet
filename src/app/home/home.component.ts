@@ -4,7 +4,10 @@ import { EthAccount } from "../models/eth-account";
 // import { Btc } from "bitcoinjs-lib";
 import * as Btc from 'bitcoinjs-lib'
 // import * as bip39 from 'bip39'
-import * as request from "request";
+// import * as request from "request";
+// import { request } from "request";
+import { HttpClient } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-home',
@@ -45,7 +48,7 @@ export class HomeComponent implements OnInit {
     address: "0xFaF77E4584fE0dF6e859eCC54648837267E50558",
   }
 
-  constructor(private readonly cs: ContractsService) {
+  constructor(private readonly cs: ContractsService, private http: HttpClient) {
   }
 
   ngOnInit() {
@@ -59,12 +62,15 @@ export class HomeComponent implements OnInit {
     this.getEtherBalance()
   }
 
-  getBitcoinAmount() {
+  async getBitcoinAmount() {
     var addr = this.bitCoinAccount["address"]
-    request.get(`https://testnet.blockexplorer.com/api/${addr}/balance`, (err, req, body) => {
-      console.log(JSON.parse(body))
-     }
-    )
+    console.log("address", addr)
+    // console.log(JSON)
+    var res = await this.http.get(`https://testnet.blockexplorer.com/api/addr/${addr}/balance`).toPromise()
+    console.log("res", res)
+    // this..get(`https://testnet.blockexplorer.com/api/${addr}/balance`, (err, req, body) => {
+    // //   console.log(JSON.parse(body))
+    // })
   }
 
   createNewBitcoinAccount() {
