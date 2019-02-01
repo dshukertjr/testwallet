@@ -98,122 +98,131 @@ export class HomeComponent implements OnInit {
 
   createNewBitcoinAccount() {
     // console.log(Btc)
-    var keyPair = Btc.ECPair.makeRandom({ network: this.TestNet })
+    var keyPair = Btc.ECPair.makeRandom({network: this.TestNet})
+    Btc.ECPair.fromWIF("")
+    var publicKey = keyPair.publicKey
+
+    var p2pkh = Btc.payments.p2pkh({ pubkey: keyPair.publicKey, network: this.TestNet }) //public key hash
+    var address = p2pkh.address
+    var privateKey = keyPair.toWIF()
+    console.log("address inside", address)
     console.log("keypair", keyPair)
-    // let publicKey = keyPair.getAddress()
-    // let privateKey = keyPair.toWIF()
-    var pkh = Btc.payments.p2pkh({ pubkey: keyPair.publicKey, network: this.TestNet }) //public key hash
-    console.log("pkh", pkh)
-    var hash = sha256(Buffer.from(pkh.address, "hex"))
-    console.log("hash", hash)
-    var publicKeyHash = new ripemd160().update(Buffer.from(hash, "hex")).digest()
-    console.log("public key hash", publicKeyHash)
-    var step1 = Buffer.from(`00${publicKeyHash}`, "hex")
-    console.log("step1", step1)
-    var step2 = sha256(step1)
-    console.log("step2", step2)
+    console.log("address", address)
+    console.log("privateKey", privateKey)
+    console.log("publicKey", publicKey)
+
+    for(var i = 0; i < 10; i++) {
+      var p2pkh = Btc.payments.p2pkh({ pubkey: keyPair.publicKey, network: this.TestNet }) //public key hash
+      var address = p2pkh.address
+      console.log("address", address)
+    }
+    // console.log("pkh", pkh)
+    // var hash = sha256(Buffer.from(pkh.address, "hex"))
+    // console.log("hash", hash)
+    // var publicKeyHash = new ripemd160().update(Buffer.from(hash, "hex")).digest()
+    // console.log("public key hash", publicKeyHash)
+    // var step1 = Buffer.from(`00${publicKeyHash}`, "hex")
+    // console.log("step1", step1)
+    // var step2 = sha256(step1)
+    // console.log("step2", step2)
     // const step1 = Buffer.from(`00${pkh.hash}`, 'hex')
     // console.log("step1", step1)
-    var address = pkh.address
-    console.log("address", address)
-    var privateKey = keyPair.toWIF()
-    console.log("privateKey", privateKey)
-    this.bitCoinAccount["address"] = address
-    this.bitCoinAccount["privateKey"] = privateKey
-    console.log("bitcoin account", this.bitCoinAccount)
+    // this.bitCoinAccount["address"] = address
+    // this.bitCoinAccount["privateKey"] = privateKey
+    // console.log("bitcoin account", this.bitCoinAccount)
   }
 
-onNewBlock() {
-  try {
-    const that = this
-    console.log("on new block")
-    this.cs.newBlockSubscription.subscribe((e, res) => {
-      // console.log(res)
-      if (e) return console.error(e)
-    }).on('data', async (res) => {
-      that.etherBalance = await that.cs.getEtherBalance(that.account.address)
-      that.rawCustomTokenBalance = await that.cs.getRawCustomTokenBalance(that.account.address)
-      that.calculateCustomTokenBalance()
-    })
-  } catch (e) {
-    return console.error(e)
-  }
-}
-
-async sendCustomTokenTo() {
-  try {
-    var decimalZero = ""
-    for (var i = 0; i < this.customTokenDecimal; i++) {
-      decimalZero += "0"
+  onNewBlock() {
+    try {
+      const that = this
+      console.log("on new block")
+      this.cs.newBlockSubscription.subscribe((e, res) => {
+        // console.log(res)
+        if (e) return console.error(e)
+      }).on('data', async (res) => {
+        that.etherBalance = await that.cs.getEtherBalance(that.account.address)
+        that.rawCustomTokenBalance = await that.cs.getRawCustomTokenBalance(that.account.address)
+        that.calculateCustomTokenBalance()
+      })
+    } catch (e) {
+      return console.error(e)
     }
-    const amount = this.sendAmount + decimalZero
-    console.log(amount)
-    await this.cs.sendCustomToken(this.account, this.recevingEthAccount, amount)
-    this.getAccounts()
-    console.log("custom token send request sent")
-  } catch (e) {
-    alert(e)
-    return console.error(e)
   }
-}
 
-async sendEtherTo() {
-  try {
-    const amount = this.sendAmount.toString()
-    console.log(amount)
-    await this.cs.sendEther(this.account, this.recevingEthAccount, amount)
-    this.getAccounts()
-    console.log("ether send request sent")
-  } catch (e) {
-    alert(e)
-    return console.error(e)
+  async sendCustomTokenTo() {
+    try {
+      var decimalZero = ""
+      for (var i = 0; i < this.customTokenDecimal; i++) {
+        decimalZero += "0"
+      }
+      const amount = this.sendAmount + decimalZero
+      console.log(amount)
+      await this.cs.sendCustomToken(this.account, this.recevingEthAccount, amount)
+      this.getAccounts()
+      console.log("custom token send request sent")
+    } catch (e) {
+      alert(e)
+      return console.error(e)
+    }
   }
-}
+
+  async sendEtherTo() {
+    try {
+      const amount = this.sendAmount.toString()
+      console.log(amount)
+      await this.cs.sendEther(this.account, this.recevingEthAccount, amount)
+      this.getAccounts()
+      console.log("ether send request sent")
+    } catch (e) {
+      alert(e)
+      return console.error(e)
+    }
+  }
 
   private async createAccount() {
-  try {
-    this.account = await this.cs.createAccount()
-    console.log(this.account)
-  } catch (e) {
-    alert(e)
-    return console.error(e)
+    try {
+      this.account = await this.cs.createAccount()
+      console.log(this.account)
+    } catch (e) {
+      alert(e)
+      return console.error(e)
+    }
   }
-}
 
   private async getEtherBalance() {
-  try {
-    this.etherBalance = await this.cs.getEtherBalance(this.account.address)
-  } catch (e) {
-    // alert(e)
-    return console.error(e)
+    try {
+      this.etherBalance = await this.cs.getEtherBalance(this.account.address)
+    } catch (e) {
+      // alert(e)
+      return console.error(e)
+    }
   }
-}
 
   private async getRawCustomTokenBalance() {
-  try {
-    this.rawCustomTokenBalance = await this.cs.getRawCustomTokenBalance(this.account.address)
-    this.calculateCustomTokenBalance()
-  } catch (e) {
-    // alert(e)
-    return console.error(e)
+    try {
+      this.rawCustomTokenBalance = await this.cs.getRawCustomTokenBalance(this.account.address)
+      this.calculateCustomTokenBalance()
+    } catch (e) {
+      // alert(e)
+      return console.error(e)
+    }
   }
-}
 
   private async getCustomTokenDecimal() {
-  try {
-    this.customTokenDecimal = await this.cs.getCustomTokenDecimal()
-    this.calculateCustomTokenBalance()
-  } catch (e) {
-    alert(e)
-    return console.error(e)
+    try {
+      this.customTokenDecimal = await this.cs.getCustomTokenDecimal()
+      this.calculateCustomTokenBalance()
+    } catch (e) {
+      alert(e)
+      return console.error(e)
+    }
   }
-}
 
   private calculateCustomTokenBalance() {
-  if (this.rawCustomTokenBalance && this.customTokenDecimal) {
-    var rawCustomTokenBalance: number = +this.rawCustomTokenBalance
-    var decimals: number = +this.customTokenDecimal
-    this.customTokenBalance = (rawCustomTokenBalance / (Math.pow(10, decimals))).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    if (this.rawCustomTokenBalance && this.customTokenDecimal) {
+      var rawCustomTokenBalance: number = +this.rawCustomTokenBalance
+      var decimals: number = +this.customTokenDecimal
+      this.customTokenBalance = (rawCustomTokenBalance / (Math.pow(10, decimals))).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    }
   }
-}
 }
